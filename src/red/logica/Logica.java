@@ -65,13 +65,13 @@ public class Logica {
      * Calcula el camino óptimo (menor latencia) entre dos equipos utilizando el algoritmo de Dijkstra.
      * Se consideran únicamente los nodos y conexiones que están activos.
      *
-     * @param idOrigen Identificador del equipo de origen.
-     * @param idDestino Identificador del equipo de destino.
+     * @param ipOrigen Identificador del equipo de origen.
+     * @param ipDestino Identificador del equipo de destino.
      * @return Una lista posicional de vértices que representa la ruta desde el origen hasta el destino.
      * @throws IllegalArgumentException Si alguno de los equipos no existe o no está activo en el grafo adaptado.
      * Complejidad Temporal: O(E log V), dominada por la ejecución del algoritmo de Dijkstra.
      */
-    public PositionalList<Vertex<Equipo>> traceroute(String idOrigen, String idDestino) {
+    public PositionalList<Vertex<Equipo>> traceroute(String ipOrigen, String ipDestino) {
 
         PositionalList<Vertex<Equipo>> camino;
 
@@ -81,11 +81,11 @@ public class Logica {
         Vertex<Equipo> destinoNode = null;
 
         for (Vertex<Equipo> v : grafoActivo.vertices()) {
-            String id = v.getElement().getId();
-            if (id.equals(idOrigen)) {
+            String id = v.getElement().getIpAddress();
+            if (id.equals(ipOrigen)) {
                 origenNode = v;
             }
-            if (id.equals(idDestino)) {
+            if (id.equals(ipDestino)) {
                 destinoNode = v;
             }
         }
