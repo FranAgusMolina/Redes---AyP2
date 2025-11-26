@@ -18,18 +18,31 @@ import java.util.TreeMap;
  * Se encarga de gestionar la lógica central y coordinar los diferentes módulos.
  */
 public class Cordinador {
-    Logica red;
-    TreeMap<String, Equipo> equipos;
-    List<Conexion> conexiones;
-    Red datosRed;
+    private Logica red = null;
+    private TreeMap<String, Equipo> equipos;
+    private List<Conexion> conexiones;
+    private Red datosRed;
 
     public void inicio()
     {
         inicioDatos();
 
+        inicioLogica(equipos, conexiones);
+
         inicioRed();
 
         inicioUI();
+    }
+
+    private void inicioLogica(TreeMap<String, Equipo> equipos, List<Conexion> conexiones)
+    {
+        try {
+            red = new Logica(equipos, conexiones);
+            System.out.println("-----------Grafo cargado exitosamente.-----------");
+        } catch (Exception e) {
+            System.err.println("Error al cargar el grafo: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -61,17 +74,6 @@ public class Cordinador {
             System.out.println("Conexion de " + conexion.getSource().getId() + " a " + conexion.getTarget().getId());
 
         }
-
-
-        try {
-            red = new Logica(equipos, conexiones);
-            System.out.println("-----------Grafo cargado exitosamente.-----------");
-        } catch (Exception e) {
-            System.err.println("Error al cargar el grafo: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-
     }
 
     private void inicioRed()
