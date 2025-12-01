@@ -15,27 +15,27 @@ import java.util.TreeMap;
 public class Logica {
 
     private Graph<Equipo, Conexion> red;
-    private HashMap<String, Vertex<Equipo>> vertices;
+    private TreeMap<String, Vertex<Equipo>> vertices;
 
     /**
      * Constructor que inicializa el grafo principal y carga los datos de equipos y conexiones.
      *
      * @param equipos Mapa ordenado de equipos donde la clave es el ID y el valor es el objeto Equipo.
      * @param conexiones Lista de objetos Conexion que definen las aristas del grafo.
-     * Complejidad Temporal: O(V + E), donde V es el número de equipos y E el número de conexiones.
+     * Complejidad Temporal: O(n), donde V es el número de equipos y E el número de conexiones.
      */
     public Logica(TreeMap<String, Equipo> equipos, List<Conexion> conexiones) {
         red = new AdjacencyMapGraph<>(false);
-        vertices = new HashMap<>();
+        vertices = new TreeMap<>();
 
         for (Equipo equipo : equipos.values()) {
             Vertex<Equipo> v = red.insertVertex(equipo);
-            vertices.put(equipo.getId(), v);
+            vertices.put(equipo.getIpAddress(), v);
         }
 
         for (Conexion con : conexiones) {
-            Vertex<Equipo> v1 = vertices.get(con.getSource().getId());
-            Vertex<Equipo> v2 = vertices.get(con.getTarget().getId());
+            Vertex<Equipo> v1 = vertices.get(con.getSource().getIpAddress());
+            Vertex<Equipo> v2 = vertices.get(con.getTarget().getIpAddress());
 
             if (v1 != null && v2 != null) {
                 if (red.getEdge(v1, v2) == null) {
@@ -50,15 +50,10 @@ public class Logica {
      *
      * @param ip Dirección IP del equipo a verificar.
      * @return true si el equipo existe y su estado es activo, false en caso contrario.
-     * Complejidad Temporal: O(V), ya que en el peor de los casos se recorren todos los vértices del grafo.
+     * Complejidad Temporal: O(1).
      */
     public boolean ping(String ip) {
-        for (Vertex<Equipo> v : red.vertices()) {
-            if (v.getElement().getIpAddress().equals(ip)) {
-                return v.getElement().isStatus();
-            }
-        }
-        return false;
+        return vertices.get(ip).getElement().isStatus();
     }
 
     /**
@@ -69,7 +64,7 @@ public class Logica {
      * @param ipDestino Identificador del equipo de destino.
      * @return Una lista posicional de vértices que representa la ruta desde el origen hasta el destino.
      * @throws IllegalArgumentException Si alguno de los equipos no existe o no está activo en el grafo adaptado.
-     * Complejidad Temporal: O(E log V), dominada por la ejecución del algoritmo de Dijkstra.
+     * Complejidad Temporal: O(nlog(n)), dominada por la ejecución del algoritmo de Dijkstra.
      */
     public PositionalList<Vertex<Equipo>> traceroute(String ipOrigen, String ipDestino) {
 
@@ -81,21 +76,22 @@ public class Logica {
         Vertex<Equipo> destinoNode = null;
 
         for (Vertex<Equipo> v : grafoActivo.vertices()) {
-            String id = v.getElement().getIpAddress();
-            if (id.equals(ipOrigen)) {
+            String ip = v.getElement().getIpAddress();
+            if (ip.equals(ipOrigen)) {
                 origenNode = v;
             }
-            if (id.equals(ipDestino)) {
+            if (ip.equals(ipDestino)) {
                 destinoNode = v;
             }
         }
 
+
         if (origenNode == null || destinoNode == null) {
             throw new IllegalArgumentException("Uno o ambos equipos no se encuentran activos o no existen en la red.");
         }
+        camino = GraphAlgorithms.shortestPathList(grafoActivo, origenNode, destinoNode);
 
         try{
-            camino = GraphAlgorithms.shortestPathList(grafoActivo, origenNode, destinoNode);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("No se encontró una ruta entre los equipos especificados.");
         }
@@ -105,10 +101,10 @@ public class Logica {
 
     /**
      * Calcula el Árbol de Expansión Mínima (MST) de la red activa basándose en la latencia de las conexiones.
-     * Utiliza el algoritmo de Prim-Jarnik o Kruskal según la implementación subyacente.
+     * Utiliza el algoritmo de Kruskal.
      *
      * @return Una lista de cadenas de texto formateadas describiendo las conexiones del MST y sus latencias.
-     * Complejidad Temporal: O(E log E) o O(E log V), dependiendo de la implementación específica del algoritmo de MST.
+     * Complejidad Temporal: O(nlog(n)).
      */
     public List<String> MST() {
         Graph<Equipo, Integer> grafoActivo = crearGrafoActivo();
@@ -129,24 +125,24 @@ public class Logica {
      * Las aristas del nuevo grafo utilizan la latencia (Integer) como peso para los algoritmos.
      *
      * @return Un grafo no dirigido con los elementos activos de la red.
-     * Complejidad Temporal: O(V + E), requerida para recorrer y filtrar todos los vértices y aristas del grafo original.
+     * Complejidad Temporal: O(n), requerida para recorrer y filtrar todos los vértices y aristas del grafo original.
      */
     private Graph<Equipo, Integer> crearGrafoActivo() {
         Graph<Equipo, Integer> grafoActivo = new AdjacencyMapGraph<>(false);
-        HashMap<String, Vertex<Equipo>> mapaActivos = new HashMap<>();
+        TreeMap<String, Vertex<Equipo>> mapaActivos = new TreeMap<>();
 
         for (Vertex<Equipo> v : red.vertices()) {
             if (v.getElement().isStatus()) {
                 Vertex<Equipo> nuevoV = grafoActivo.insertVertex(v.getElement());
-                mapaActivos.put(v.getElement().getId(), nuevoV);
+                mapaActivos.put(v.getElement().getIpAddress(), nuevoV);
             }
         }
 
         for (Edge<Conexion> e : red.edges()) {
             Conexion c = e.getElement();
             if (c.isStatus()) {
-                Vertex<Equipo> v1 = mapaActivos.get(c.getSource().getId());
-                Vertex<Equipo> v2 = mapaActivos.get(c.getTarget().getId());
+                Vertex<Equipo> v1 = mapaActivos.get(c.getSource().getIpAddress());
+                Vertex<Equipo> v2 = mapaActivos.get(c.getTarget().getIpAddress());
 
                 if (v1 != null && v2 != null) {
                     grafoActivo.insertEdge(v1, v2, c.getLatencia());

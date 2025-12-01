@@ -33,7 +33,7 @@ public class Dato {
 				modelo = read.next();
                 firmware = read.next();
                 throughput= read.next();
-                equipo.put(id, new Router(id, ipAddress, macAddress, Boolean.parseBoolean(status), ubicacion, modelo, firmware, Integer.parseInt(throughput)));
+                equipo.put(ipAddress, new Router(id, ipAddress, macAddress, Boolean.parseBoolean(status), ubicacion, modelo, firmware, Integer.parseInt(throughput)));
                 
 			}
 			read.close();
@@ -60,7 +60,7 @@ public class Dato {
                 macAddress = read.next();
 				status = read.next();
                 ubicacion = read.next();
-				equipo.put(id,new Computadora(id, ipAddress, macAddress, Boolean.parseBoolean(status), ubicacion));
+				equipo.put(ipAddress,new Computadora(id, ipAddress, macAddress, Boolean.parseBoolean(status), ubicacion));
 			}
 			read.close();
 		
@@ -99,21 +99,21 @@ public class Dato {
         read = new Scanner(new File(archivoConexiones));
         read.useDelimiter("\\s*;\\s*");
         Equipo e1, e2;
-        String idEquipo1, idEquipo2, tipoConexion, bandwidth, latencia, errorRate;
+        String ipEquipo1, ipEquipo2, tipoConexion, bandwidth, latencia, errorRate;
         
         while (read.hasNext()) {
-        	idEquipo1 = read.next();
-            idEquipo2 = read.next();
-        	if (equipos.containsKey(idEquipo1) && equipos.containsKey(idEquipo2)) {
-        		e1 = equipos.get(idEquipo1);
-        		e2 = equipos.get(idEquipo2);
+        	ipEquipo1 = read.next();
+            ipEquipo2 = read.next();
+        	if (equipos.containsKey(ipEquipo1) && equipos.containsKey(ipEquipo2)) {
+        		e1 = equipos.get(ipEquipo1);
+        		e2 = equipos.get(ipEquipo2);
         		tipoConexion = read.next();
         		bandwidth = read.next();
         		latencia = read.next();
         		errorRate = read.next();
         		conexiones.add(new Conexion(e1, e2, tipoConexion, Integer.parseInt(bandwidth), Integer.parseInt(latencia), Double.parseDouble(errorRate)));
         	} else {
-        		System.out.println("Error IDs de los equipos no encontrados en el mapa");
+        		System.out.println("Error IPs de los equipos no encontrados en el mapa");
         	}
         }
 	    read.close();
