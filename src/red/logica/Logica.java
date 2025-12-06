@@ -13,8 +13,8 @@ import java.util.TreeMap;
  */
 public class Logica {
 
-    private Graph<Equipo, Conexion> red;
-    private TreeMap<String, Vertex<Equipo>> vertices;
+    private final Graph<Equipo, Conexion> red;
+    private final TreeMap<String, Vertex<Equipo>> vertices;
 
     /**
      * Constructor que inicializa el grafo principal y carga los datos de equipos y conexiones.
