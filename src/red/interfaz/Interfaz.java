@@ -2,7 +2,6 @@ package red.interfaz;
 
 import javax.swing.*;
 
-import net.datastructures.Graph;
 import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 import red.interfaz.util.utilUI;
@@ -18,9 +17,8 @@ public class Interfaz {
      */
     public static int opcion() {
         // Agregamos la opción al inicio o final del array
-        String[] options = { "Salir", "Árbol de expansión mínimo", "Traceroute", "Ping", "Ver Mapa de Red", "Cálculo de Ancho de Banda Máximo (Max Flow)" };
-
-        int input = JOptionPane.showOptionDialog(
+        String[] options = { "Salir", "Árbol de expansión mínimo", "Traceroute", "Ping", "Mapa de Red", "MaxFlow" };
+        return JOptionPane.showOptionDialog(
                 null,
                 "Seleccione una operación:",
                 "Sistema de Redes",
@@ -30,18 +28,16 @@ public class Interfaz {
                 options,
                 options[0]
         );
-        return input;
     }
 
     public static String leerIP(TreeMap<String, Equipo> datos) {
-        String ip = utilUI.seleccionarIP("Seleccione equipo al que hacerle ping", "Seleccione la direccion IP del equipo:", datos);
-        return ip;
+        return utilUI.seleccionarIP("Seleccione equipo al que hacerle ping", "Seleccione la direccion IP del equipo:", datos);
     }
 
     /**
      * Muestra el resultado del ping
-     * @param equipo
-     * @param estado
+     * @param equipo equipo seleccionado
+     * @param estado estado del equipo
      */
     public static void ping(String equipo, boolean estado){
 
@@ -55,9 +51,9 @@ public class Interfaz {
 
     /**
      * Muestra el resultado del traceroute
-     * @param ipOrigen
-     * @param ipDestino
-     * @param camino
+     * @param ipOrigen equipo origen
+     * @param ipDestino equipo destino
+     * @param camino camino entre ambos equipos
      */
     public static void resultadoTraceroute(String ipOrigen, String ipDestino, PositionalList<Vertex<Equipo>> camino) {
         StringBuilder sb = new StringBuilder();
@@ -103,7 +99,7 @@ public class Interfaz {
 
         for (String p : mst) {
             // Asume formato: "id1 <--> id2 [Latencia: xx ms]\n"
-            String[] partes = p.split(" <--> | \\[Latencia: | ms\\]");
+            String[] partes = p.split(" <--> | \\[Latencia: | ms");
             if (partes.length >= 3) {
                 outputTextArea.append(String.format("%-10s %-10s %-15s\n", partes[0], partes[1], partes[2]));
             }
@@ -148,11 +144,13 @@ public class Interfaz {
      */
     public static void mostrarFlujoMaximo(String ipOrigen, String ipDestino, int flujo) {
         String mensaje = String.format(
-                "Cálculo de Ancho de Banda Máximo (Max Flow)\n\n" +
-                        "Origen: %s\n" +
-                        "Destino: %s\n" +
-                        "--------------------------------------------\n" +
-                        "Capacidad Máxima de Transferencia: %d Mbps",
+                """
+                        Cálculo de Ancho de Banda Máximo (Max Flow)
+                        
+                        Origen: %s
+                        Destino: %s
+                        --------------------------------------------
+                        Capacidad Máxima de Transferencia: %d Mbps""",
                 ipOrigen, ipDestino, flujo
         );
 
