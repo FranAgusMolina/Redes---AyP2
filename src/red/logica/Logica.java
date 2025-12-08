@@ -121,6 +121,31 @@ public class Logica {
     }
 
     /**
+     * Calcula el flujo máximo entre dos equipos en la red activa utilizando el algoritmo de Edmonds-Karp.
+     * @param ipOrigen
+     * @param ipDestino
+     * @return
+     */
+    public int calcularFlujoMaximo(String ipOrigen, String ipDestino) {
+        Graph<Equipo, Integer> grafoCap = crearGrafoCapacidad();
+
+        Vertex<Equipo> source = null;
+        Vertex<Equipo> sink = null;
+
+        // Buscar los vértices en el nuevo grafo
+        for (Vertex<Equipo> v : grafoCap.vertices()) {
+            if (v.getElement().getIpAddress().equals(ipOrigen)) source = v;
+            if (v.getElement().getIpAddress().equals(ipDestino)) sink = v;
+        }
+
+        if (source == null || sink == null) {
+            throw new IllegalArgumentException("Origen o destino no válidos o inactivos.");
+        }
+
+        return GraphAlgorithms.maxFlow(grafoCap, source, sink);
+    }
+
+    /**
      * Crea y retorna una copia del grafo original que incluye únicamente los equipos y conexiones activos.
      * Las aristas del nuevo grafo utilizan la latencia (Integer) como peso para los algoritmos.
      *
@@ -150,5 +175,44 @@ public class Logica {
             }
         }
         return grafoActivo;
+    }
+
+    /**
+     * Crea un grafo donde las aristas tienen como peso el ancho de banda (bandwidth).
+     * Solo incluye elementos activos.
+     */
+    private Graph<Equipo, Integer> crearGrafoCapacidad() {
+        Graph<Equipo, Integer> grafoCap = new AdjacencyMapGraph<>(false); // false = no dirigido según tu diseño
+        TreeMap<String, Vertex<Equipo>> mapaActivos = new TreeMap<>();
+
+        // 1. Insertar Vertices Activos
+        for (Vertex<Equipo> v : red.vertices()) {
+            if (v.getElement().isStatus()) {
+                Vertex<Equipo> nuevoV = grafoCap.insertVertex(v.getElement());
+                mapaActivos.put(v.getElement().getIpAddress(), nuevoV);
+            }
+        }
+
+        // 2. Insertar Aristas Activas con Bandwidth
+        for (Edge<Conexion> e : red.edges()) {
+            Conexion c = e.getElement();
+            if (c.isStatus()) {
+                Vertex<Equipo> v1 = mapaActivos.get(c.getSource().getIpAddress());
+                Vertex<Equipo> v2 = mapaActivos.get(c.getTarget().getIpAddress());
+
+                if (v1 != null && v2 != null) {
+                    // AQUÍ ESTÁ EL CAMBIO: Usamos getBandwidth() en lugar de getLatencia()
+                    grafoCap.insertEdge(v1, v2, c.getBandwidth());
+                }
+            }
+        }
+        return grafoCap;
+    }
+
+
+
+    //metodo necesario para mostrar el grafo en la UI
+    public Graph getGrafo() {
+        return this.red;
     }
 }

@@ -22,6 +22,8 @@
  */
 package net.datastructures;
 
+import red.modelo.Equipo;
+
 import java.util.Set;
 import java.util.HashSet;
 
@@ -324,5 +326,77 @@ public class GraphAlgorithms {
 	}
 
 
-	
+    /**
+     * Calcula el flujo máximo entre source y sink usando el algoritmo de Edmonds-Karp.
+     * Asume que el elemento de la arista (E) es un Integer que representa la capacidad.
+     */
+    public static <V> int maxFlow(Graph<V, Integer> g, Vertex<V> source, Vertex<V> sink) {
+        int maxFlow = 0;
+
+        Map<Edge<Integer>, Integer> flowMap = new ProbeHashMap<>();
+        for (Edge<Integer> e : g.edges()) {
+            flowMap.put(e, 0);
+        }
+
+        while (true) {
+            Map<Vertex<V>, Edge<Integer>> parentMap = new ProbeHashMap<>();
+            Queue<Vertex<V>> queue = new LinkedQueue<>();
+            Set<Vertex<V>> visited = new HashSet<>();
+
+            queue.enqueue(source);
+            visited.add(source);
+
+            boolean pathFound = false;
+            while (!queue.isEmpty()) {
+                Vertex<V> u = queue.dequeue();
+                if (u == sink) {
+                    pathFound = true;
+                    break;
+                }
+
+                for (Edge<Integer> e : g.outgoingEdges(u)) {
+                    Vertex<V> v = g.opposite(u, e);
+
+                    int capacity = e.getElement();
+                    int currentFlow = flowMap.get(e);
+                    int residual = capacity - currentFlow;
+
+                    if (residual > 0 && !visited.contains(v)) {
+                        visited.add(v);
+                        parentMap.put(v, e);
+                        queue.enqueue(v);
+                    }
+                }
+            }
+
+            if (!pathFound) {
+                break; // No hay más caminos, terminamos
+            }
+
+            int pathFlow = Integer.MAX_VALUE;
+            Vertex<V> curr = sink;
+            while (curr != source) {
+                Edge<Integer> edge = parentMap.get(curr);
+                int capacity = edge.getElement();
+                int currentFlow = flowMap.get(edge);
+                pathFlow = Math.min(pathFlow, capacity - currentFlow);
+
+                Vertex<V>[] ends = g.endVertices(edge);
+
+                curr = g.opposite(curr, edge);
+            }
+
+            curr = sink;
+            while (curr != source) {
+                Edge<Integer> edge = parentMap.get(curr);
+                int currentFlow = flowMap.get(edge);
+                flowMap.put(edge, currentFlow + pathFlow);
+                curr = g.opposite(curr, edge);
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
 }

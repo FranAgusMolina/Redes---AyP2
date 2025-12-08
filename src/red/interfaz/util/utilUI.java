@@ -21,44 +21,36 @@ public class utilUI {
      */
     public static String seleccionarIP(String titulo, String mensaje, Map<String, Equipo> equipos) {
 
-        // 1. Validar si hay datos
         if (equipos == null || equipos.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No hay equipos disponibles.");
             return null;
         }
 
-        // 2. Transformar el Mapa de Equipos a una Lista de Strings formateada
         List<String> opciones = new ArrayList<>();
         for (Equipo e : equipos.values()) {
-            // Creamos el formato "IP - ID" para que el usuario lo vea en el combo
             String etiqueta = e.getId() + " - " + e.getIpAddress();
             opciones.add(etiqueta);
         }
 
-        // 3. Ordenar alfabéticamente (por ID) para facilitar la búsqueda
         Collections.sort(opciones);
 
-        // 4. Configurar el ComboBox
         String[] arrayOpciones = opciones.toArray(new String[0]);
         JComboBox<String> comboBox = new JComboBox<>(arrayOpciones);
         comboBox.setEditable(true); // Permite escribir para filtrar/buscar
 
-        // 5. Mostrar el diálogo
         int result = JOptionPane.showConfirmDialog(null, comboBox, mensaje,
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
-        // 6. Procesar la selección
         if (result == JOptionPane.OK_OPTION) {
             String seleccion = (String) comboBox.getSelectedItem();
             if (seleccion != null && !seleccion.isEmpty()) {
-                // Extraer solo la IP (asumiendo formato "ID - IP")
-                // Ejemplo: "Router1 - 192.168.1.1" -> split(" - ")[0] -> "192.168.1.1"
                 if (seleccion.contains(" - ")) {
                     return seleccion.split(" - ")[1].trim();
                 }
                 return seleccion.trim(); // Si el usuario escribió solo la IP a mano
             }
         }
+
         return null;
     }
 

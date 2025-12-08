@@ -85,6 +85,12 @@ public class Cordinador {
         while (on) {
             int opcion = Interfaz.opcion();
             switch (opcion) {
+                case 5:
+                    ejecutarMaxFlow();
+                    break;
+                case 4:
+                    ejecutarMostrarGrafo();
+                    break;
                 case 3:
                     ejecutarPing();
                     break;
@@ -113,16 +119,49 @@ public class Cordinador {
         }
     }
 
+    private void ejecutarMaxFlow() {
+        try {
+            String origen = Interfaz.leerIP(datosRed.getEquiposEncendidos());
+            if (origen == null) return;
+
+            String destino = Interfaz.leerIP(datosRed.getEquiposEncendidos());
+            if (destino == null) return;
+
+            if (origen.equals(destino)) {
+                Interfaz.mostrarError("El origen y el destino no pueden ser el mismo equipo.");
+                return;
+            }
+
+            int maxFlow = red.calcularFlujoMaximo(origen, destino);
+
+            // Mostrar resultado
+            Interfaz.mostrarFlujoMaximo(origen, destino, maxFlow);
+
+        } catch (IllegalArgumentException e) {
+            Interfaz.mostrarError(e.getMessage());
+        } catch (Exception e) {
+            Interfaz.mostrarError("Error al calcular flujo: " + e.getMessage());
+        }
+    }
+
+    private void ejecutarMostrarGrafo() {
+        Interfaz.mostrarGrafo(red.getGrafo());
+    }
+
     private void ejecutarPing(){
         String equipo = Interfaz.leerIP(datosRed.getEquipos());
+        if(equipo.equals(null)) return; //el usuario cancelo la operacion
+
         boolean estado = red.ping(equipo);
         Interfaz.ping(equipo, estado);
     }
 
     private void ejecutarTraceroute(){
         String destino = Interfaz.leerIP(datosRed.getEquiposEncendidos());
-        String origen = Interfaz.leerIP(datosRed.getEquiposEncendidos());
+        if(destino.equals(null)) return; //el usuario cancelo la operacion
 
+        String origen = Interfaz.leerIP(datosRed.getEquiposEncendidos());
+        if(origen.equals(null)) return; //el usuario cancelo la operacion
         try{
             PositionalList<Vertex<Equipo>> traceroute = red.traceroute(destino, origen);
             Interfaz.resultadoTraceroute(origen, destino, traceroute);

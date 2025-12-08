@@ -1,8 +1,8 @@
 package red.interfaz;
 
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 
+import net.datastructures.Graph;
 import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 import red.interfaz.util.utilUI;
@@ -17,19 +17,19 @@ public class Interfaz {
      * @return eleccion del usuario
      */
     public static int opcion() {
-    	String[] options = { "4.salir", "3. Arbol de expansion minimo", "2. Traceroute","1. Ping"};
-    	
-    	int input = JOptionPane.showOptionDialog(
+        // Agregamos la opción al inicio o final del array
+        String[] options = { "Salir", "Árbol de expansión mínimo", "Traceroute", "Ping", "Ver Mapa de Red", "Cálculo de Ancho de Banda Máximo (Max Flow)" };
+
+        int input = JOptionPane.showOptionDialog(
                 null,
-                "Seleccione:",
-                "Funcion",
+                "Seleccione una operación:",
+                "Sistema de Redes",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
                 options,
                 options[0]
-            );
-    	
+        );
         return input;
     }
 
@@ -112,7 +112,18 @@ public class Interfaz {
         JOptionPane.showMessageDialog(null, outputTextArea, "Árbol de expansión mínimo", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    public static void mostrarGrafo(net.datastructures.Graph<red.modelo.Equipo, red.modelo.Conexion> grafo) {
+        JDialog ventana = new JDialog((java.awt.Frame) null, "Visualización de la Red", true);
+        ventana.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
+        PanelRed panel = new PanelRed(grafo);
+        ventana.add(panel);
+
+        ventana.setSize(1280, 800);
+        ventana.setLocationRelativeTo(null);
+
+        ventana.setVisible(true);
+    }
     /**
      * Mensaje de salida
      */
@@ -130,5 +141,21 @@ public class Interfaz {
 
     public static void mostrarError(String mensaje){
         utilUI.mostrarError(mensaje);
+    }
+
+    /**
+     * Muestra el resultado del cálculo de flujo máximo.
+     */
+    public static void mostrarFlujoMaximo(String ipOrigen, String ipDestino, int flujo) {
+        String mensaje = String.format(
+                "Cálculo de Ancho de Banda Máximo (Max Flow)\n\n" +
+                        "Origen: %s\n" +
+                        "Destino: %s\n" +
+                        "--------------------------------------------\n" +
+                        "Capacidad Máxima de Transferencia: %d Mbps",
+                ipOrigen, ipDestino, flujo
+        );
+
+        JOptionPane.showMessageDialog(null, mensaje, "Resultado Max Flow", JOptionPane.INFORMATION_MESSAGE);
     }
 }
