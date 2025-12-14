@@ -5,19 +5,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import red.modelo.Equipo; // Importante para poder usar el objeto Equipo
+import red.modelo.Equipo;
 
+/**
+ * Clase utilitaria para operaciones comunes de la interfaz de usuario.
+ * Proporciona métodos estáticos para mostrar diálogos y selector de equipos.
+ */
 public class utilUI {
 
+    /**
+     * Constructor por defecto.
+     *
+     * Complejidad Temporal: O(1).
+     */
     public utilUI(){
     }
 
     /**
-     * Método genérico para mostrar un ComboBox buscable a partir de un mapa de Equipos.
-     * @param titulo Título de la ventana
-     * @param mensaje Mensaje para el usuario
-     * @param equipos Mapa de equipos (Clave: ID, Valor: Objeto Equipo)
-     * @return La IP seleccionada (string limpio) o null si cancela.
+     * Muestra un ComboBox buscable con los equipos disponibles para que el usuario seleccione uno.
+     * El combo box permite escribir para filtrar/buscar equipos.
+     *
+     * @param titulo Título de la ventana de diálogo.
+     * @param mensaje Mensaje descriptivo para el usuario.
+     * @param equipos Mapa de equipos disponibles (Clave: IP, Valor: Objeto Equipo).
+     * @return La dirección IP seleccionada (string limpio) o null si el usuario cancela.
+     * Complejidad Temporal: O(V log V), donde V es el número de equipos (dominado por el ordenamiento de la lista).
      */
     public static String seleccionarIP(String titulo, String mensaje, Map<String, Equipo> equipos) {
 
@@ -36,7 +48,7 @@ public class utilUI {
 
         String[] arrayOpciones = opciones.toArray(new String[0]);
         JComboBox<String> comboBox = new JComboBox<>(arrayOpciones);
-        comboBox.setEditable(true); // Permite escribir para filtrar/buscar
+        comboBox.setEditable(true);
 
         int result = JOptionPane.showConfirmDialog(null, comboBox, mensaje,
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -47,7 +59,7 @@ public class utilUI {
                 if (seleccion.contains(" - ")) {
                     return seleccion.split(" - ")[1].trim();
                 }
-                return seleccion.trim(); // Si el usuario escribió solo la IP a mano
+                return seleccion.trim();
             }
         }
 

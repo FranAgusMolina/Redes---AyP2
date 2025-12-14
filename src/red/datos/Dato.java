@@ -4,19 +4,25 @@ import red.modelo.*;
 import java.io.*;
 import java.util.*;
 
-
+/**
+ * Clase encargada de la carga de datos de equipos y conexiones desde archivos.
+ * Proporciona métodos estáticos para leer computadoras, routers y conexiones.
+ */
 public class Dato {
 
 	/**
-	 * 
-	 * @param archivoRouters ruta de acceso para el archivo de routers
-	 * @return mapa con todos los routers asociados a su id
-	 * @throws FileNotFoundException archivo de routers no existe
+	 * Carga los routers desde un archivo de texto delimitado por punto y coma.
+	 * Cada línea del archivo representa un router con sus atributos.
+	 *
+	 * @param archivoRouters Ruta de acceso al archivo de routers.
+	 * @return HashMap con todos los routers asociados a su dirección IP como clave.
+	 * @throws FileNotFoundException Si el archivo de routers no existe.
+	 * Complejidad Temporal: O(R), donde R es el número de routers en el archivo.
 	 */
-    private static TreeMap<String, Equipo> cargarRouters(String archivoRouters) throws FileNotFoundException {
+    private static HashMap<String, Equipo> cargarRouters(String archivoRouters) throws FileNotFoundException {
 		Scanner read;
 
-		TreeMap<String, Equipo> equipo = new TreeMap<String, Equipo>();
+		HashMap<String, Equipo> equipo = new HashMap<>();
 		
 		
 			read = new Scanner(new File(archivoRouters));
@@ -41,14 +47,17 @@ public class Dato {
 		return equipo;
 	}
     /**
-     * 
-     * @param archivoComputadoras ruta de acceso al archivo de computadoras
-     * @return mapa con los valores de cada comutadora asociado con su id
-     * @throws FileNotFoundException el archivo de computadoras no existe
+     * Carga las computadoras desde un archivo de texto delimitado por punto y coma.
+     * Cada línea del archivo representa una computadora con sus atributos.
+     *
+     * @param archivoComputadoras Ruta de acceso al archivo de computadoras.
+     * @return HashMap con todas las computadoras asociadas a su dirección IP como clave.
+     * @throws FileNotFoundException Si el archivo de computadoras no existe.
+     * Complejidad Temporal: O(C), donde C es el número de computadoras en el archivo.
      */
-	private static TreeMap<String, Equipo> cargarComputadoras(String archivoComputadoras) throws FileNotFoundException {
+	private static HashMap<String, Equipo> cargarComputadoras(String archivoComputadoras) throws FileNotFoundException {
 		Scanner read;
-		TreeMap<String, Equipo> equipo = new TreeMap<String, Equipo>();
+		HashMap<String, Equipo> equipo = new HashMap<>();
 		
 			read = new Scanner(new File(archivoComputadoras));
 			read.useDelimiter("\\s*;\\s*");
@@ -70,14 +79,17 @@ public class Dato {
 
 
 	/**
-	 * combina los dos mapas de computadoras y routers en uno solo
-	 * @param archivoComputadoras ruta de acceso para el archivo de computadoras
-	 * @param archivoRouters ruta de acceso para el archivo de touters
-	 * @return mapa con los valores de los equipos asociados a su id
-	 * @throws FileNotFoundException archivo de computadoras y/o archivo de routers no encontrado
+	 * Combina los mapas de computadoras y routers en un único mapa de equipos.
+	 * Carga ambos tipos de equipos y los unifica bajo una sola estructura de datos.
+	 *
+	 * @param archivoComputadoras Ruta de acceso al archivo de computadoras.
+	 * @param archivoRouters Ruta de acceso al archivo de routers.
+	 * @return HashMap con todos los equipos asociados a su dirección IP como clave.
+	 * @throws FileNotFoundException Si alguno de los archivos no se encuentra.
+	 * Complejidad Temporal: O(C + R), donde C es el número de computadoras y R el número de routers.
 	 */
-    public static TreeMap<String, Equipo> cargarEquipos(String archivoComputadoras, String archivoRouters) throws FileNotFoundException {
-        TreeMap<String, Equipo> equipos = new TreeMap<>();
+    public static HashMap<String, Equipo> cargarEquipos(String archivoComputadoras, String archivoRouters) throws FileNotFoundException {
+        HashMap<String, Equipo> equipos = new HashMap<>();
 
         equipos.putAll(Dato.cargarRouters(archivoRouters));
         equipos.putAll(Dato.cargarComputadoras(archivoComputadoras));
@@ -86,13 +98,17 @@ public class Dato {
     }
 
     /**
-     * lee el archivo de conexiones y las carga a una lista
-     * @param archivoConexiones ruta de acceso al archivo de los routers
-     * @param equipos mapa de los equipos
-     * @return lista de conexiones
-     * @throws FileNotFoundException archivo de conexiones no encontrado
+     * Lee las conexiones desde un archivo de texto delimitado por punto y coma.
+     * Cada línea representa una conexión entre dos equipos identificados por su IP.
+     * Solo crea conexiones si ambos equipos existen en el mapa proporcionado.
+     *
+     * @param archivoConexiones Ruta de acceso al archivo de conexiones.
+     * @param equipos HashMap de equipos previamente cargados.
+     * @return Lista de objetos Conexion que representan las aristas del grafo.
+     * @throws FileNotFoundException Si el archivo de conexiones no existe.
+     * Complejidad Temporal: O(E), donde E es el número de conexiones en el archivo.
      */
-    public static List<Conexion> cargarConexiones(String archivoConexiones, TreeMap<String, Equipo> equipos) throws FileNotFoundException {
+    public static List<Conexion> cargarConexiones(String archivoConexiones, HashMap<String, Equipo> equipos) throws FileNotFoundException {
         Scanner read;
         List<Conexion> conexiones = new ArrayList<Conexion>();
 

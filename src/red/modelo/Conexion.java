@@ -19,7 +19,6 @@ public class Conexion {
         this.errorRate = errorRate;
     }
 
-    // Getters and setters
     public Equipo getSource() {
         return source;
     }
@@ -77,12 +76,16 @@ public class Conexion {
     }
     
     /**
-     * Si el vertice src o target resulta ser falso entonces la conexion tambien lo es
-     * @return status de la conexion
+     * Determina el estado de la conexión basándose en el estado de ambos equipos.
+     * La conexión está activa solo si ambos equipos (origen y destino) están activos.
+     *
+     * @return true si ambos equipos están activos, false en caso contrario.
+     * Complejidad Temporal: O(1).
      */
     private boolean getStatus() {
     	return (this.source.isStatus() && this.target.isStatus());
     }
+
     @Override
     public String toString() {
         return "Conexion{" +

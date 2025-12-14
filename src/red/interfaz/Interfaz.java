@@ -2,6 +2,7 @@ package red.interfaz;
 
 import javax.swing.*;
 
+import net.datastructures.Graph;
 import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 import red.interfaz.util.utilUI;
@@ -9,14 +10,19 @@ import red.modelo.*;
 import red.logica.*;
 import java.util.*;
 
+/**
+ * Clase que gestiona la interfaz de usuario del sistema de redes.
+ * Proporciona métodos estáticos para mostrar información y solicitar entrada del usuario mediante diálogos.
+ */
 public class Interfaz {
     
     /**
-     * metodo que muestra una serie de oopciones al usuario
-     * @return eleccion del usuario
+     * Muestra un menú de opciones al usuario para seleccionar operaciones del sistema.
+     *
+     * @return Índice de la opción seleccionada por el usuario.
+     * Complejidad Temporal: O(1).
      */
     public static int opcion() {
-        // Agregamos la opción al inicio o final del array
         String[] options = { "Salir", "Árbol de expansión mínimo", "Traceroute", "Ping", "Mapa de Red", "MaxFlow" };
         return JOptionPane.showOptionDialog(
                 null,
@@ -30,18 +36,26 @@ public class Interfaz {
         );
     }
 
-    public static String leerIP(TreeMap<String, Equipo> datos) {
+    /**
+     * Solicita al usuario que seleccione una dirección IP de un mapa de equipos.
+     *
+     * @param datos Mapa de equipos disponibles para seleccionar.
+     * @return Dirección IP seleccionada o null si el usuario cancela.
+     * Complejidad Temporal: O(V log V), donde V es el número de equipos (dominado por el ordenamiento).
+     */
+    public static String leerIP(HashMap<String, Equipo> datos) {
         return utilUI.seleccionarIP("Seleccione equipo al que hacerle ping", "Seleccione la direccion IP del equipo:", datos);
     }
 
     /**
-     * Muestra el resultado del ping
-     * @param equipo equipo seleccionado
-     * @param estado estado del equipo
+     * Muestra el resultado de una operación de ping.
+     * Indica si el equipo está activo o no.
+     *
+     * @param equipo Dirección IP del equipo verificado.
+     * @param estado Estado del equipo (true = activo, false = inactivo).
+     * Complejidad Temporal: O(1).
      */
     public static void ping(String equipo, boolean estado){
-
-
           if (estado) {
             JOptionPane.showMessageDialog(null, "El equipo con la direccion IP" + equipo + " Esta activo");
         }else {
@@ -50,10 +64,13 @@ public class Interfaz {
     }
 
     /**
-     * Muestra el resultado del traceroute
-     * @param ipOrigen equipo origen
-     * @param ipDestino equipo destino
-     * @param camino camino entre ambos equipos
+     * Muestra el resultado del algoritmo traceroute entre dos equipos.
+     * Presenta la ruta completa con todos los saltos intermedios.
+     *
+     * @param ipOrigen Dirección IP del equipo origen.
+     * @param ipDestino Dirección IP del equipo destino.
+     * @param camino Lista posicional de vértices que representan el camino.
+     * Complejidad Temporal: O(H), donde H es el número de saltos en el camino.
      */
     public static void resultadoTraceroute(String ipOrigen, String ipDestino, PositionalList<Vertex<Equipo>> camino) {
         StringBuilder sb = new StringBuilder();
@@ -85,8 +102,11 @@ public class Interfaz {
 
 
     /**
-     * Muestra el arbol de expansion minimo
-     * @param mst Lista de conexiones del arbol de expansion minimo
+     * Muestra las conexiones del Árbol de Expansión Mínima (MST) de la red.
+     * Presenta una tabla formateada con origen, destino y latencia de cada arista.
+     *
+     * @param mst Lista de cadenas formateadas describiendo las conexiones del MST.
+     * Complejidad Temporal: O(E), donde E es el número de aristas en el MST.
      */
     public static void MST(List<String> mst) {
         JTextArea outputTextArea = new JTextArea();
@@ -98,7 +118,6 @@ public class Interfaz {
         outputTextArea.append("----------------------------------------\n");
 
         for (String p : mst) {
-            // Asume formato: "id1 <--> id2 [Latencia: xx ms]\n"
             String[] partes = p.split(" <--> | \\[Latencia: | ms");
             if (partes.length >= 3) {
                 outputTextArea.append(String.format("%-10s %-10s %-15s\n", partes[0], partes[1], partes[2]));
@@ -108,7 +127,14 @@ public class Interfaz {
         JOptionPane.showMessageDialog(null, outputTextArea, "Árbol de expansión mínimo", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void mostrarGrafo(net.datastructures.Graph<red.modelo.Equipo, red.modelo.Conexion> grafo) {
+    /**
+     * Abre una ventana gráfica interactiva que visualiza el grafo completo de la red.
+     * Permite ver todos los equipos y conexiones con la posibilidad de arrastrar nodos.
+     *
+     * @param grafo Grafo de la red a visualizar.
+     * Complejidad Temporal: O(V + E), para renderizar todos los vértices y aristas.
+     */
+    public static void mostrarGrafo(Graph<Equipo, Conexion> grafo) {
         JDialog ventana = new JDialog((java.awt.Frame) null, "Visualización de la Red", true);
         ventana.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -120,8 +146,11 @@ public class Interfaz {
 
         ventana.setVisible(true);
     }
+
     /**
-     * Mensaje de salida
+     * Muestra un mensaje de despedida y finaliza la aplicación.
+     *
+     * Complejidad Temporal: O(1).
      */
     public static void salir() {
     	JOptionPane.showMessageDialog(null, "Saliendo");
@@ -129,18 +158,32 @@ public class Interfaz {
     }
     
     /**
-     * Mensaje al ingresar una opcion incorrecta
+     * Muestra un mensaje de error cuando el usuario ingresa una opción inválida.
+     *
+     * Complejidad Temporal: O(1).
      */
     public static void invalido() {
     	JOptionPane.showMessageDialog(null, "Opcion invalida");
     }
 
+    /**
+     * Muestra un mensaje de error personalizado al usuario.
+     *
+     * @param mensaje Texto del mensaje de error a mostrar.
+     * Complejidad Temporal: O(1).
+     */
     public static void mostrarError(String mensaje){
         utilUI.mostrarError(mensaje);
     }
 
     /**
-     * Muestra el resultado del cálculo de flujo máximo.
+     * Muestra el resultado del cálculo de flujo máximo entre dos equipos.
+     * Presenta el origen, destino y la capacidad máxima de transferencia.
+     *
+     * @param ipOrigen Dirección IP del equipo origen.
+     * @param ipDestino Dirección IP del equipo destino.
+     * @param flujo Valor del flujo máximo calculado en Mbps.
+     * Complejidad Temporal: O(1).
      */
     public static void mostrarFlujoMaximo(String ipOrigen, String ipDestino, int flujo) {
         String mensaje = String.format(

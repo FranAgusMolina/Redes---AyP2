@@ -4,8 +4,8 @@ import net.datastructures.*;
 import red.modelo.Conexion;
 import red.modelo.Equipo;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 
 /**
  * Clase encargada de la lógica de negocio de la red de computadoras.
@@ -14,18 +14,42 @@ import java.util.TreeMap;
 public class Logica {
 
     private final Graph<Equipo, Conexion> red;
-    private final TreeMap<String, Vertex<Equipo>> vertices;
+    private final HashMap<String, Vertex<Equipo>> vertices;
+
+    /**
+     * Resumen de Complejidades Temporales:
+     *
+     * MÉTODOS LÓGICOS:
+     * - ping(ip): O(1) - Acceso directo a HashMap.
+     * - traceroute(ipOrigen, ipDestino): O((V + E) log V) - Dominado por Dijkstra.
+     * - MST(): O(E log E) - Dominado por algoritmo de Kruskal.
+     * - calcularFlujoMaximo(ipOrigen, ipDestino): O(VE²) - Dominado por Edmonds-Karp.
+     *
+     * MÉTODOS AUXILIARES:
+     * - crearGrafoActivo() y crearGrafoCapacidad(): O(V + E) - Recorre todos los vértices y aristas.
+     *
+     * ALGORITMOS UTILIZADOS (de GraphAlgorithms):
+     * - BFS: O(V + E) - Búsqueda en anchura.
+     * - Dijkstra (shortestPathLengths): O((V + E) log V) - Con heap adaptable.
+     * - Kruskal (MST): O(E log E) - Con Union-Find.
+     * - Edmonds-Karp (maxFlow): O(VE²) - Ford-Fulkerson con BFS.
+     *
+     * Donde:
+     * V = número de vértices (equipos)
+     * E = número de aristas (conexiones)
+     */
 
     /**
      * Constructor que inicializa el grafo principal y carga los datos de equipos y conexiones.
      *
      * @param equipos Mapa ordenado de equipos donde la clave es el ID y el valor es el objeto Equipo.
      * @param conexiones Lista de objetos Conexion que definen las aristas del grafo.
-          * Complejidad Temporal: O(V + E), donde V es el número de equipos y E el número de conexiones.
+     * Complejidad Temporal: O(V + E), donde V es el número de equipos y E el número de conexiones.
+     * O(n)
      */
-    public Logica(TreeMap<String, Equipo> equipos, List<Conexion> conexiones) {
+    public Logica(HashMap<String, Equipo> equipos, List<Conexion> conexiones) {
         red = new AdjacencyMapGraph<>(false);
-        vertices = new TreeMap<>();
+        vertices = new HashMap<>();
 
         for (Equipo equipo : equipos.values()) {
             Vertex<Equipo> v = red.insertVertex(equipo);
@@ -49,7 +73,7 @@ public class Logica {
      *
      * @param ip Dirección IP del equipo a verificar.
      * @return true si el equipo existe y su estado es activo, false en caso contrario.
-     * Complejidad Temporal: O(1).
+     * Complejidad Temporal: O(1), acceso directo al HashMap por clave IP.
      */
     public boolean ping(String ip) {
         return vertices.get(ip).getElement().isStatus();
@@ -59,11 +83,17 @@ public class Logica {
      * Calcula el camino óptimo (menor latencia) entre dos equipos utilizando el algoritmo de Dijkstra.
      * Se consideran únicamente los nodos y conexiones que están activos.
      *
-     * @param ipOrigen Identificador del equipo de origen.
-     * @param ipDestino Identificador del equipo de destino.
+     * @param ipOrigen Dirección IP del equipo de origen.
+     * @param ipDestino Dirección IP del equipo de destino.
      * @return Una lista posicional de vértices que representa la ruta desde el origen hasta el destino.
-     * @throws IllegalArgumentException Si alguno de los equipos no existe o no está activo en el grafo adaptado.
-     * Complejidad Temporal: O(nlog(n)), dominada por la ejecución del algoritmo de Dijkstra.
+     * @throws IllegalArgumentException Si alguno de los equipos no existe, no está activo, o no hay camino entre ellos.
+     * Complejidad Temporal:
+     * - crearGrafoActivo: O(V + E), para filtrar elementos activos.
+     * - shortestPathLengths (Dijkstra): O((V + E) log V), utilizando heap adaptable.
+     * - spTree: O(V + E), para reconstruir el árbol de caminos mínimos.
+     * - shortestPathList: O(V), para reconstruir el camino específico.
+     * - traceroute: O((V + E) log V), dominado por Dijkstra.
+     * - traceroute: O( n log(n) ))
      */
     public PositionalList<Vertex<Equipo>> traceroute(String ipOrigen, String ipDestino) {
 
@@ -101,10 +131,16 @@ public class Logica {
 
     /**
      * Calcula el Árbol de Expansión Mínima (MST) de la red activa basándose en la latencia de las conexiones.
-     * Utiliza el algoritmo de Kruskal.
+     * Utiliza el algoritmo de Kruskal con estructura Union-Find para detectar ciclos.
      *
      * @return Una lista de cadenas de texto formateadas describiendo las conexiones del MST y sus latencias.
-          * Complejidad Temporal: O(E log E), donde E es el número de aristas (conexiones activas) en el grafo.
+     * Complejidad Temporal:
+     * - crearGrafoActivo: O(V + E), para filtrar elementos activos.
+     * - Kruskal (MST): O(E log E), donde E es el número de aristas, dominado por la ordenación de aristas.
+     * - Union-Find: O(α(V)), donde α es la función inversa de Ackermann (prácticamente constante).
+     * - Formateo de resultados: O(V), para construir la lista de strings.
+     * - MST: O(E log E), dominado por el algoritmo de Kruskal.
+     * - MST: O( n log(n) )
      */
     public List<String> MST() {
         Graph<Equipo, Integer> grafoActivo = crearGrafoActivo();
@@ -122,9 +158,18 @@ public class Logica {
 
     /**
      * Calcula el flujo máximo entre dos equipos en la red activa utilizando el algoritmo de Edmonds-Karp.
-     * @param ipOrigen
-     * @param ipDestino
-     * @return
+     * Este algoritmo es una implementación del metodo Ford-Fulkerson que utiliza BFS para encontrar caminos de aumento.
+     *
+     * @param ipOrigen Dirección IP del equipo origen (fuente).
+     * @param ipDestino Dirección IP del equipo destino (sumidero).
+     * @return Valor entero que representa el flujo máximo entre origen y destino.
+     * @throws IllegalArgumentException Si alguno de los equipos no es válido o no está activo.
+     * Complejidad Temporal:
+     * - crearGrafoCapacidad: O(V + E), para crear el grafo con capacidades.
+     * - BFS: O(V + E), para encontrar un camino de aumento en cada iteración.
+     * - Edmonds-Karp: O(VE²), ya que hay como máximo O(VE) iteraciones y cada una ejecuta BFS.
+     * - calcularFlujoMaximo: O(VE²), dominado por Edmonds-Karp.
+     * - calcularFlujoMaximo: O(n²)
      */
     public int calcularFlujoMaximo(String ipOrigen, String ipDestino) {
         Graph<Equipo, Integer> grafoCap = crearGrafoCapacidad();
@@ -150,11 +195,12 @@ public class Logica {
      * Las aristas del nuevo grafo utilizan la latencia (Integer) como peso para los algoritmos.
      *
      * @return Un grafo no dirigido con los elementos activos de la red.
-          * Complejidad Temporal: O(V + E), donde V es el número de vértices y E el número de aristas; requerida para recorrer y filtrar todos los vértices y aristas del grafo original.
+     * Complejidad Temporal: O(V + E), donde V es el número de vértices y E el número de aristas;
+     * requerida para recorrer y filtrar todos los vértices y aristas del grafo original.
      */
     private Graph<Equipo, Integer> crearGrafoActivo() {
         Graph<Equipo, Integer> grafoActivo = new AdjacencyMapGraph<>(false);
-        TreeMap<String, Vertex<Equipo>> mapaActivos = new TreeMap<>();
+        HashMap<String, Vertex<Equipo>> mapaActivos = new HashMap<>();
 
         for (Vertex<Equipo> v : red.vertices()) {
             if (v.getElement().isStatus()) {
@@ -179,13 +225,15 @@ public class Logica {
 
     /**
      * Crea un grafo donde las aristas tienen como peso el ancho de banda (bandwidth).
-     * Solo incluye elementos activos.
+     * Solo incluye elementos activos para operaciones de flujo máximo.
+     *
+     * @return Un grafo no dirigido con capacidades en las aristas.
+     * Complejidad Temporal: O(V + E), donde V es el número de vértices y E el número de aristas.
      */
     private Graph<Equipo, Integer> crearGrafoCapacidad() {
         Graph<Equipo, Integer> grafoCap = new AdjacencyMapGraph<>(false); // false = no dirigido según tu diseño
-        TreeMap<String, Vertex<Equipo>> mapaActivos = new TreeMap<>();
+        HashMap<String, Vertex<Equipo>> mapaActivos = new HashMap<>();
 
-        // 1. Insertar Vertices Activos
         for (Vertex<Equipo> v : red.vertices()) {
             if (v.getElement().isStatus()) {
                 Vertex<Equipo> nuevoV = grafoCap.insertVertex(v.getElement());
@@ -193,7 +241,6 @@ public class Logica {
             }
         }
 
-        // 2. Insertar Aristas Activas con Bandwidth
         for (Edge<Conexion> e : red.edges()) {
             Conexion c = e.getElement();
             if (c.isStatus()) {
@@ -201,7 +248,6 @@ public class Logica {
                 Vertex<Equipo> v2 = mapaActivos.get(c.getTarget().getIpAddress());
 
                 if (v1 != null && v2 != null) {
-                    // AQUÍ ESTÁ EL CAMBIO: Usamos getBandwidth() en lugar de getLatencia()
                     grafoCap.insertEdge(v1, v2, c.getBandwidth());
                 }
             }
@@ -209,10 +255,13 @@ public class Logica {
         return grafoCap;
     }
 
-
-
-    //metodo necesario para mostrar el grafo en la UI
-    public Graph getGrafo() {
+    /**
+     * Obtiene el grafo principal de la red con todos sus equipos y conexiones.
+     *
+     * @return El grafo completo de la red.
+     * Complejidad Temporal: O(1).
+     */
+    public Graph<Equipo, Conexion> getGrafo() {
         return this.red;
     }
 }

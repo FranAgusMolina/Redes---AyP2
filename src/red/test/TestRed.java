@@ -14,9 +14,8 @@ import red.modelo.Conexion;
 import red.modelo.Equipo;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
-
 /**
  * Clase de pruebas de integración.
  * Carga los datos reales desde los archivos .txt (usando Dato.java)
@@ -30,7 +29,7 @@ class LogicaTest {
     void setUp() {
         try {
             CargarParametros.parametros();
-            TreeMap<String, Equipo> equipos = Dato.cargarEquipos(
+            HashMap<String, Equipo> equipos = Dato.cargarEquipos                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  (
                     CargarParametros.getArchivoComputadoras(),
                     CargarParametros.getArchivoRouters()
             );

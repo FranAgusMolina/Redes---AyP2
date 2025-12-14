@@ -1,4 +1,6 @@
 package red.modelo;
+
+
 public class Router extends Equipo {
     private String modelo;
     private String firmware;

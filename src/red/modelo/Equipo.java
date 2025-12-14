@@ -1,4 +1,5 @@
 package red.modelo;
+
 public abstract class Equipo {
     private String id;
     private String ipAddress;
@@ -13,6 +14,7 @@ public abstract class Equipo {
         this.status = status;
         this.ubicacion = ubicacion;
     }
+
 
     public String getId() {
         return id;

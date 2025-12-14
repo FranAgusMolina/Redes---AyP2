@@ -11,15 +11,25 @@ import net.datastructures.Edge;
 import red.modelo.Equipo;
 import red.modelo.Conexion;
 
+/**
+ * Panel personalizado para la visualización gráfica interactiva del grafo de red.
+ * Permite arrastrar nodos y muestra equipos y conexiones con sus propiedades.
+ */
 public class PanelRed extends JPanel {
     private Graph<Equipo, Conexion> grafo;
-    private Map<Vertex<Equipo>, Point> coordenadas;
-    private final int RADIO_NODO = 30;
+    private  Map<Vertex<Equipo>, Point> coordenadas;
+    private static final int RADIO_NODO = 30;
 
-    // Variables para el arrastre (Drag & Drop)
     private Vertex<Equipo> nodoSeleccionado = null;
     private Point offsetMouse = null;
 
+    /**
+     * Constructor que inicializa el panel con el grafo a visualizar.
+     * Calcula las coordenadas iniciales de los nodos y configura los listeners de ratón.
+     *
+     * @param grafo Grafo de la red a visualizar.
+     * Complejidad Temporal: O(V), donde V es el número de vértices del grafo.
+     */
     public PanelRed(Graph<Equipo, Conexion> grafo) {
         this.grafo = grafo;
         this.coordenadas = new HashMap<>();
@@ -48,6 +58,12 @@ public class PanelRed extends JPanel {
         this.addMouseMotionListener(mouseHandler);
     }
 
+    /**
+     * Calcula las coordenadas iniciales de todos los vértices del grafo.
+     * Distribuye los nodos en una cuadrícula para evitar superposición.
+     *
+     * Complejidad Temporal: O(V), donde V es el número de vértices.
+     */
     private void calcularCoordenadasIniciales() {
         int numVertices = grafo.numVertices();
 
@@ -71,10 +87,16 @@ public class PanelRed extends JPanel {
         }
     }
 
+    /**
+     * Detecta si un clic del ratón ha seleccionado algún nodo del grafo.
+     * Utiliza detección de colisión circular.
+     *
+     * @param click Punto donde se hizo clic.
+     * Complejidad Temporal: O(V), donde V es el número de vértices (en el peor caso).
+     */
     private void seleccionarNodo(Point click) {
         for (Map.Entry<Vertex<Equipo>, Point> entry : coordenadas.entrySet()) {
             Point p = entry.getValue();
-            // Chequeo simple de colisión circular
             if (click.distance(p.x + RADIO_NODO/2.0, p.y + RADIO_NODO/2.0) <= RADIO_NODO/2.0) {
                 nodoSeleccionado = entry.getKey();
                 offsetMouse = new Point(click.x - p.x, click.y - p.y);
@@ -83,14 +105,28 @@ public class PanelRed extends JPanel {
         }
     }
 
+    /**
+     * Mueve el nodo seleccionado a una nueva posición y redibuja el panel.
+     *
+     * @param actual Posición actual del ratón.
+     * Complejidad Temporal: O(1) para mover el nodo, O(V + E) para repaint.
+     */
     private void moverNodo(Point actual) {
         if (nodoSeleccionado != null) {
             Point nuevaPos = new Point(actual.x - offsetMouse.x, actual.y - offsetMouse.y);
             coordenadas.put(nodoSeleccionado, nuevaPos);
-            repaint(); // Redibujar el panel
+            repaint();
         }
     }
 
+    /**
+     * Dibuja el grafo completo en el panel: aristas con sus pesos y vértices con sus IDs.
+     * Las aristas activas se muestran en gris sólido, las inactivas con línea punteada roja.
+     * Los nodos activos se muestran en verde, los inactivos en rojo salmón.
+     *
+     * @param g Contexto gráfico para dibujar.
+     * Complejidad Temporal: O(V + E), donde V es el número de vértices y E el número de aristas.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -111,7 +147,7 @@ public class PanelRed extends JPanel {
                 g2d.setColor(Color.LIGHT_GRAY);
                 g2d.setStroke(new BasicStroke(2));
             } else {
-                g2d.setColor(new Color(255, 100, 100)); // Rojo suave
+                g2d.setColor(new Color(255, 100, 100));
                 g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
             }
 
@@ -121,7 +157,7 @@ public class PanelRed extends JPanel {
             int midX = (c1x + c2x)/2;
             int midY = (c1y + c2y)/2;
 
-            g2d.setColor(new Color(255, 255, 255, 200)); // Blanco semi-transparente
+            g2d.setColor(new Color(255, 255, 255, 200));
             FontMetrics fm = g2d.getFontMetrics();
             int w = fm.stringWidth(data);
             g2d.fillRect(midX - w/2, midY - fm.getAscent(), w, fm.getHeight());
@@ -137,9 +173,9 @@ public class PanelRed extends JPanel {
             Equipo equipo = v.getElement();
 
             if (equipo.isStatus()) {
-                g2d.setColor(new Color(144, 238, 144)); // Verde claro
+                g2d.setColor(new Color(144, 238, 144));
             } else {
-                g2d.setColor(new Color(255, 160, 122)); // Rojo salmón
+                g2d.setColor(new Color(255, 160, 122));
             }
 
             g2d.fillOval(p.x, p.y, RADIO_NODO, RADIO_NODO);
@@ -152,7 +188,7 @@ public class PanelRed extends JPanel {
             String id = equipo.getId();
             FontMetrics fm = g2d.getFontMetrics();
             int textX = p.x + (RADIO_NODO - fm.stringWidth(id)) / 2;
-            g2d.drawString(id, textX, p.y - 5); // Un poco arriba del nodo
+            g2d.drawString(id, textX, p.y - 5);
         }
     }
 }

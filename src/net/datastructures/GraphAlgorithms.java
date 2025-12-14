@@ -22,8 +22,6 @@
  */
 package net.datastructures;
 
-import red.modelo.Equipo;
-
 import java.util.Set;
 import java.util.HashSet;
 
