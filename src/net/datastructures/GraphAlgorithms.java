@@ -194,7 +194,7 @@ public class GraphAlgorithms {
      * The edge's element is assumed to be its integral weight.
      */
     public static <V> Map<Vertex<V>, Integer>
-    shortestPathLengths(Graph<V, Integer> g, Vertex<V> src) {
+    shortestPathLengths(Graph<V, Integer> grafo, Vertex<V> origen) {
         // d.get(v) is upper bound on distance from src to v
         Map<Vertex<V>, Integer> d = new ProbeHashMap<>();
         // map reachable v to its d value
@@ -208,8 +208,8 @@ public class GraphAlgorithms {
 
         // for each vertex v of the graph, add an entry to the priority queue, with
         // the source having distance 0 and all others having infinite distance
-        for (Vertex<V> v : g.vertices()) {
-            if (v == src)
+        for (Vertex<V> v : grafo.vertices()) {
+            if (v == origen)
                 d.put(v, 0);
             else
                 d.put(v, Integer.MAX_VALUE);
@@ -222,8 +222,8 @@ public class GraphAlgorithms {
             Vertex<V> u = entry.getValue();
             cloud.put(u, key);                             // this is actual distance to u
             pqTokens.remove(u);                            // u is no longer in pq
-            for (Edge<Integer> e : g.outgoingEdges(u)) {
-                Vertex<V> v = g.opposite(u, e);
+            for (Edge<Integer> e : grafo.outgoingEdges(u)) {
+                Vertex<V> v = grafo.opposite(u, e);
                 if (cloud.get(v) == null) {
                     // perform relaxation step on edge (u,v)
                     int wgt = e.getElement();
@@ -242,16 +242,15 @@ public class GraphAlgorithms {
    * The tree is represented as a map from each reachable vertex v (other than s)
    * to the edge e = (u,v) that is used to reach v from its parent u in the tree.
    */
-  public static <V> Map<Vertex<V>,Edge<Integer>>
-  spTree(Graph<V,Integer> g, Vertex<V> s, Map<Vertex<V>,Integer> d) {
+  public static <V> Map<Vertex<V>,Edge<Integer>> spTree(Graph<V,Integer> grafo, Vertex<V> origen, Map<Vertex<V>,Integer> caminosPonderados) {
     Map<Vertex<V>, Edge<Integer>> tree = new ProbeHashMap<>();
-    for (Vertex<V> v : d.keySet())
-      if (v != s)
-        for (Edge<Integer> e : g.incomingEdges(v)) {   // consider INCOMING edges
-          Vertex<V> u = g.opposite(v, e);
+    for (Vertex<V> v : caminosPonderados.keySet())
+      if (v != origen)
+        for (Edge<Integer> e : grafo.incomingEdges(v)) {   // consider INCOMING edges
+          Vertex<V> u = grafo.opposite(v, e);
           int wgt = e.getElement();
-          if (d.get(v) == d.get(u) + wgt)
-            tree.put(v, e);                            // edge is is used to reach v
+          if (caminosPonderados.get(v) == caminosPonderados.get(u) + wgt)
+            tree.put(v, e);                            // edge is used to reach v
         }
     return tree;
   }
@@ -294,32 +293,33 @@ public class GraphAlgorithms {
     return tree;
   }
   	/**
-	 * Computes shortest-path distances from src vertex to target vertex of g.
+	 * Computes shortest-path distances from origen vertex to destino vertex of grafo.
 	 *
 	 * This implementation uses Dijkstra's algorithm and shortest-path tree retun a
 	 * Positional List of vertex
 	 *
 	 * The edge's element is assumed to be its integral weight.
 	 */
-  public static <V> PositionalList<Vertex<V>> shortestPathList(Graph<V, Integer> g, Vertex<V> src, Vertex<V> target) {
+  public static <V> PositionalList<Vertex<V>> shortestPathList(Graph<V, Integer> grafo, Vertex<V> origen, Vertex<V> destino) {
 	    PositionalList<Vertex<V>> path = new LinkedPositionalList<>();
 	    
-	    Map<Vertex<V>, Integer> res = GraphAlgorithms.shortestPathLengths(g, src);
-	    Map<Vertex<V>, Edge<Integer>> tree = GraphAlgorithms.spTree(g, src, res);
+	    Map<Vertex<V>, Integer> caminosPesados = GraphAlgorithms.shortestPathLengths(grafo, origen); //devuelve un mapa de los vertices y su peso para ir
+	    Map<Vertex<V>, Edge<Integer>> tree = GraphAlgorithms.spTree(grafo, origen, caminosPesados); //usa el mapa de vertices ponderados y arma el camino
 	    
 	    Edge<Integer> arc;
-	    Vertex<V> current = target;
-	    
-	    while (!current.equals(src)) {
+	    Vertex<V> current = destino;
+
+        //Reconstruyo el camino deseado desde atras hacia adelante
+	    while (!current.equals(origen)) {
 	        path.addFirst(current);
 	        arc = tree.get(current);
 	        if (arc == null) {
-	            throw new IllegalArgumentException("No hay camino desde " + src.getElement() + " a " + target.getElement());
+	            throw new IllegalArgumentException("No hay camino desde " + origen.getElement() + " a " + destino.getElement());
 	        }
-	        current = g.opposite(current, arc);
+	        current = grafo.opposite(current, arc);
 	    }
 	    
-	    path.addFirst(src);
+	    path.addFirst(origen);
 	    return path;
 	}
 

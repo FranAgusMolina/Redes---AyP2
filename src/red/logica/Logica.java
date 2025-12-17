@@ -93,7 +93,6 @@ public class Logica {
      * - spTree: O(V + E), para reconstruir el árbol de caminos mínimos.
      * - shortestPathList: O(V), para reconstruir el camino específico.
      * - traceroute: O((V + E) log V), dominado por Dijkstra.
-     * - traceroute: O( n log(n) ))
      */
     public PositionalList<Vertex<Equipo>> traceroute(String ipOrigen, String ipDestino) {
 
@@ -123,7 +122,7 @@ public class Logica {
         try{
             camino = GraphAlgorithms.shortestPathList(grafoActivo, origenNode, destinoNode);
         } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException("No se encontró una ruta entre el equipo (" + origenNode.getElement().getId() + ") " + origenNode.getElement().getIpAddress() + " y el equipo (" + destinoNode.getElement().getId() + ") " + destinoNode.getElement().getIpAddress() + ".");
+            throw new IllegalArgumentException("No se encontró una ruta entre el equipo (" + origenNode.getElement().getId() + ") " + origenNode.getElement().getIpAddress() + " y el equipo (" + destinoNode.getElement().getId() + ") " + destinoNode.getElement().getIpAddress() + ".");
         }
 
         return camino;
@@ -140,7 +139,6 @@ public class Logica {
      * - Union-Find: O(α(V)), donde α es la función inversa de Ackermann (prácticamente constante).
      * - Formateo de resultados: O(V), para construir la lista de strings.
      * - MST: O(E log E), dominado por el algoritmo de Kruskal.
-     * - MST: O( n log(n) )
      */
     public List<String> MST() {
         Graph<Equipo, Integer> grafoActivo = crearGrafoActivo();
@@ -169,7 +167,6 @@ public class Logica {
      * - BFS: O(V + E), para encontrar un camino de aumento en cada iteración.
      * - Edmonds-Karp: O(VE²), ya que hay como máximo O(VE) iteraciones y cada una ejecuta BFS.
      * - calcularFlujoMaximo: O(VE²), dominado por Edmonds-Karp.
-     * - calcularFlujoMaximo: O(n²)
      */
     public int calcularFlujoMaximo(String ipOrigen, String ipDestino) {
         Graph<Equipo, Integer> grafoCap = crearGrafoCapacidad();
@@ -231,7 +228,7 @@ public class Logica {
      * Complejidad Temporal: O(V + E), donde V es el número de vértices y E el número de aristas.
      */
     private Graph<Equipo, Integer> crearGrafoCapacidad() {
-        Graph<Equipo, Integer> grafoCap = new AdjacencyMapGraph<>(false); // false = no dirigido según tu diseño
+        Graph<Equipo, Integer> grafoCap = new AdjacencyMapGraph<>(false);
         HashMap<String, Vertex<Equipo>> mapaActivos = new HashMap<>();
 
         for (Vertex<Equipo> v : red.vertices()) {
