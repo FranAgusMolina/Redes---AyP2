@@ -117,12 +117,18 @@ public class Interfaz {
         outputTextArea.append(String.format("%-10s %-10s %-15s\n", "Origen", "Destino", "Latencia (ms)"));
         outputTextArea.append("----------------------------------------\n");
 
+        int total = 0;
         for (String p : mst) {
             String[] partes = p.split(" <--> | \\[Latencia: | ms");
             if (partes.length >= 3) {
                 outputTextArea.append(String.format("%-10s %-10s %-15s\n", partes[0], partes[1], partes[2]));
+                total+= Integer.parseInt(partes[2]);
             }
         }
+
+        outputTextArea.append("----------------------------------------\n");
+        outputTextArea.append("Total: " + total);
+
 
         JOptionPane.showMessageDialog(null, outputTextArea, "Árbol de expansión mínimo", JOptionPane.INFORMATION_MESSAGE);
     }

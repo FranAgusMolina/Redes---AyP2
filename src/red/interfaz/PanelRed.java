@@ -16,8 +16,8 @@ import red.modelo.Conexion;
  * Permite arrastrar nodos y muestra equipos y conexiones con sus propiedades.
  */
 public class PanelRed extends JPanel {
-    private Graph<Equipo, Conexion> grafo;
-    private  Map<Vertex<Equipo>, Point> coordenadas;
+    private final Graph<Equipo, Conexion> grafo;
+    private final Map<Vertex<Equipo>, Point> coordenadas;
     private static final int RADIO_NODO = 30;
 
     private Vertex<Equipo> nodoSeleccionado = null;
@@ -40,18 +40,20 @@ public class PanelRed extends JPanel {
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                seleccionarNodo(e.getPoint());
-            }
+                handlerMousePressed(e.getPoint());
+            } //detecta si se hizo click en un nodo
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 nodoSeleccionado = null;
             }
 
+
             @Override
             public void mouseDragged(MouseEvent e) {
-                moverNodo(e.getPoint());
-            }
+                handlerMouseDragged(e.getPoint());
+            } //mueve el nodo mientras el click este presionado
+
         };
 
         this.addMouseListener(mouseHandler);
@@ -94,7 +96,7 @@ public class PanelRed extends JPanel {
      * @param click Punto donde se hizo clic.
      * Complejidad Temporal: O(V), donde V es el número de vértices (en el peor caso).
      */
-    private void seleccionarNodo(Point click) {
+    private void handlerMousePressed(Point click) {
         for (Map.Entry<Vertex<Equipo>, Point> entry : coordenadas.entrySet()) {
             Point p = entry.getValue();
             if (click.distance(p.x + RADIO_NODO/2.0, p.y + RADIO_NODO/2.0) <= RADIO_NODO/2.0) {
@@ -111,7 +113,7 @@ public class PanelRed extends JPanel {
      * @param actual Posición actual del ratón.
      * Complejidad Temporal: O(1) para mover el nodo, O(V + E) para repaint.
      */
-    private void moverNodo(Point actual) {
+    private void handlerMouseDragged(Point actual) {
         if (nodoSeleccionado != null) {
             Point nuevaPos = new Point(actual.x - offsetMouse.x, actual.y - offsetMouse.y);
             coordenadas.put(nodoSeleccionado, nuevaPos);

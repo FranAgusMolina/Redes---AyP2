@@ -55,7 +55,6 @@ public class Cordinador {
     {
         try {
             red = new Logica(equipos, conexiones);
-            System.out.println("-----------Grafo cargado exitosamente.-----------");
         } catch (Exception e) {
             System.err.println("Error al cargar el grafo: " + e.getMessage());
             e.printStackTrace();
